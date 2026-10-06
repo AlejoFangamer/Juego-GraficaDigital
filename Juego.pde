@@ -40,11 +40,11 @@ void init() { //INICIALIZAR TODO Y REPETIR TODO
     radians(2),        // dispersión
     5,                 // rapidez bala
     5,                 // tamaño bala
-    8                 // radio de nacimiento (boca → bala)
+    16                // radio de nacimiento (boca → bala)
   );
   
   //Generar monedas aleatoriamente por la sala
-  while (monedas.size() < 5) {
+  while (monedas.size() < 10) {
     monedas.add(new Moneda(32+random(MUNDO_ANCHO-64), 32+random(MUNDO_ALTO-64)));
   }
   
