@@ -51,6 +51,7 @@ class Jugador extends Caja {
   }
 
   void dibujar(PGraphics p) {
+    drawSombra(p,posicion.x,posicion.y,tam);
     p.pushMatrix();
       p.translate(posicion.x, posicion.y);
       p.rotate(spriteAngle);

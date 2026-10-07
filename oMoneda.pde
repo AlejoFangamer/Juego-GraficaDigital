@@ -4,7 +4,7 @@
 
 Gif sprMoneda; //Animación de moneda mediante libreria de gif
 
-class Moneda extends Caja {
+class Moneda extends Caja implements Dibujable{
   PVector velocidad = new PVector(0, 0);
   float friccion = 0.9; 
   boolean recogida = false; //Esta moneda no ha sido recogida por defecto
@@ -33,7 +33,10 @@ class Moneda extends Caja {
     velocidad = PVector.random2D().mult(fuerza); //Se lanza a cualquier dirección pero a la velocidad especificada
   }
   
-  void dibujar(PGraphics p) { //Dibuja la moneda
+  public float getY() { return y; }
+  
+  public void dibujar(PGraphics p) { //Dibuja la moneda
+    drawSombra(p,x+w/2.2,y+h,w);
     p.pushMatrix();
       p.translate(x,y);
       p.image(sprMoneda,0,0);

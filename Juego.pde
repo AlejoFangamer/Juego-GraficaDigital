@@ -1,4 +1,6 @@
 import gifAnimation.*; //Libreria de animación por gif //Dudo que sea la mejor manera, pero no conozco otra mejor xD
+import java.util.Collections;
+import java.util.Comparator;
 
 int ventanaW = 320; //Tamaño real de la ventana
 int ventanaH = 180;
@@ -16,9 +18,24 @@ Disparos disparos;
 InputManager input;
 HUD hud;
 
+interface Dibujable {
+  float getY();   // la y de la "base" del objeto
+  void dibujar(PGraphics p);
+}
+
 ArrayList<Moneda> monedas = new ArrayList<Moneda>();
 ArrayList<Caja> solidos = new ArrayList<Caja>();
 ArrayList<Caja> solidosRompibles = new ArrayList<Caja>();
+
+ArrayList<Dibujable> escena = new ArrayList<Dibujable>();
+
+float lengthdir_x(float len, float dir) {
+  return len * cos(radians(dir));
+}
+
+float lengthdir_y(float len, float dir) {
+  return len * sin(radians(dir));
+}
 
 void init() { //INICIALIZAR TODO Y REPETIR TODO
 
@@ -46,6 +63,12 @@ void init() { //INICIALIZAR TODO Y REPETIR TODO
   //Generar monedas aleatoriamente por la sala
   while (monedas.size() < 10) {
     monedas.add(new Moneda(32+random(MUNDO_ANCHO-64), 32+random(MUNDO_ALTO-64)));
+  }
+  
+  for (int c = 0; c < 360; c+= 360/5){
+    float puntaX = 200 + lengthdir_x(32, c);
+    float puntaY = 100 + lengthdir_y(32, c);
+    solidos.add(new CajaConMoneda(puntaX, puntaY, 32, 32,3));
   }
   
   //Añadir cajas a la sala, de diferente tipo
@@ -129,8 +152,9 @@ void createCanvas() {
         
         jugador.dibujar(lienzo); //Dibujar al jugador
         disparos.dibujar(lienzo); //Dibujar las balas
-        for (Moneda m : monedas) m.dibujar(lienzo); //Dibujar todas las monedas
-        for (Caja s : solidos) s.dibujar(lienzo); //Dibujar todos los solidos
+        /*for (Moneda m : monedas) m.dibujar(lienzo); //Dibujar todas las monedas
+        for (Caja s : solidos) s.dibujar(lienzo); //Dibujar todos los solidos*/
+        for (Dibujable d : escena) d.dibujar(lienzo);
         
       lienzo.popMatrix();
       hud.dibujar(lienzo); //Dibujar la interfaz
@@ -147,4 +171,15 @@ void actualizarProcesos() {
   disparos.actualizar();
   for (Moneda m : monedas) m.actualizar();
   monedas.removeIf(m -> m.recogida); 
+  
+  
+  escena.clear();
+  //escena.add(jugador);
+  escena.addAll(monedas);
+  escena.addAll(solidos);
+  Collections.sort(escena, new Comparator<Dibujable>() {
+    public int compare(Dibujable a, Dibujable b) {
+      return Float.compare(a.getY(), b.getY());
+    }
+  });
 }

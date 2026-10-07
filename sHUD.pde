@@ -11,4 +11,15 @@ class HUD {
       p.text("Monedas: " + puntos,16,16); //Renderizar la cantidad de monedas
     p.popStyle();
   }
+  
+  
+  
+}
+
+void drawSombra(PGraphics p,float x, float y, float tam) {
+   p.push();
+     p.noStroke();
+     p.fill(0,100);
+     p.ellipse(x,y,tam,tam/2);
+   p.pop();
 }

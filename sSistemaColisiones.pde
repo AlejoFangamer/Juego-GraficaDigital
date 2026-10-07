@@ -4,7 +4,7 @@
 //Detecta si x objeto entra en contacto o se solapa con otro objeto, teniendo en cuenta su posicion, anchura y altura.
 //Es bastante general, si queremos hacer que un objeto tenga propiedades como posicion o tamaño, las debemos setear con super y depender de ella.
 
-class Caja {
+class Caja implements Dibujable {
   float x, y, w, h;
   color c = color(110);
   
@@ -22,7 +22,8 @@ class Caja {
            y + h > o.y;
   }
   
-  void dibujar(PGraphics p) { //Dibujar bounding box
+  public float getY() { return y; }
+  public void dibujar(PGraphics p) { //Dibujar bounding box
     p.pushStyle();
       p.stroke(c);
       p.noFill();

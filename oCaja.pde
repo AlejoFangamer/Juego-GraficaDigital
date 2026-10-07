@@ -2,7 +2,7 @@
 
 //Solido
 
-class CajaRompible extends Caja {
+class CajaRompible extends Caja implements Dibujable{
   PImage sprCaja = loadImage("./Sprites/Caja/Caja.png"); //Cargar sprite de la caja
   int vida; //Cuanta vida tiene la caja
   float squishX = 1 , squishY = 1, flash = 0; //Variables de animación
@@ -24,8 +24,9 @@ class CajaRompible extends Caja {
   }
   
   void alDestruirse() { } //Funcion vacia //Si quiero hacer otro tipo de cajas , puedo usar esta funcion como comodin para que al destruirse haga x cosa
-  
-  void dibujar(PGraphics p) {
+  public float getY() { return y+h; }
+  public void dibujar(PGraphics p) {
+    drawSombra(p,x+w/2,y+h,w);
     squishX = lerp(squishX,1,0.2);
     squishY = lerp(squishY,1,0.2);
     flash = lerp(flash,0,0.2);
