@@ -8,6 +8,8 @@ class Caja implements Dibujable {
   float x, y, w, h;
   color c = color(110);
   
+  boolean colisionable = true;
+  
   Caja(float x, float y, float w, float h){
     this.x = x;
     this.y = y;
@@ -23,6 +25,7 @@ class Caja implements Dibujable {
   }
   
   public float getY() { return y; }
+  
   public void dibujar(PGraphics p) { //Dibujar bounding box
     p.pushStyle();
       p.stroke(c);
@@ -32,6 +35,11 @@ class Caja implements Dibujable {
   }
   
   void move(float dx, float dy, ArrayList<Caja> solids) { //Movimiento de un objeto si choca con solidos
+    if (!colisionable) {            // modo fantasma: sin comprobar nada
+      x += dx;
+      y += dy;
+      return;
+    }
     // Eje X
     x += dx; //Avanza en x
     for (Caja s : solids) { //Para cada caja que entre en la categoria SOLIDA

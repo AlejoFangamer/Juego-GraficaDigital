@@ -1,29 +1,79 @@
+int vida = 3;
+
 class Jugador extends Caja {
+  PImage sprJugador = loadImage("./Sprites/Jugador/Jugador.png");
+  
   // --- Estado ---
   PVector posicion;
+  int vida;
+  int maxVida;
+  float Mirar = 1;
+  float spriteMirar = Mirar;
   float rapidez;
   float tam;
   int col = 255;
+  
+  //--I-frames--
+  int duracionIFrames = 1000;   // ms de invulnerabilidad
+  int ultimoGolpe    = -999999;
+  
+  //--Knockback--
+  PVector velocidadKnockback = new PVector(0, 0);
+  float   fuerzaKnockback    = 8;      // píxeles por frame
+  float   friccionKnockback  = 0.85; 
 
   // --- Animación ---
   boolean moviendose = false;
   float   currentTime = 0;
   float   spriteAngle = 0;
+  float   spriteOpacity = 1;
 
   // --- Punto de nacimiento del cañón (constante, no se recalcula) ---
-  final PVector OFFSET_CANON = new PVector(0, -15);
+  final PVector OFFSET_CANON = new PVector(0, -8);
 
-  Jugador(float x, float y, float rapidez, float tam) {
-    super(x - tam/2, y - tam, tam, tam);
+  Jugador(float x, float y, float rapidez, float tam, int vida) {
+    super(x - tam/2, y - tam, 8, 8);
     this.posicion = new PVector(x, y);
     this.rapidez  = rapidez;
     this.tam      = tam;
+    this.vida     = vida;
+    this.maxVida  = vida;
   }
+  
+  void daño(Caja atacante, int cantidad) {
+    if (IFrame()) return;
+    ultimoGolpe = millis();
+    
+     // Overlap en cada eje
+    float overlapX = Math.min(x + w, atacante.x + atacante.w) - Math.max(x, atacante.x);
+    float overlapY = Math.min(y + h, atacante.y + atacante.h) - Math.max(y, atacante.y);
+  
+    // El eje con MENOS solapamiento es el lado del impacto
+    if (overlapX < overlapY) {
+      velocidadKnockback = new PVector(x < atacante.x ? -1 : 1, 0).mult(fuerzaKnockback);
+    } else {
+      velocidadKnockback = new PVector(0, y < atacante.y ? -1 : 1).mult(fuerzaKnockback);
+    }
+  
+    if (vida > 0){
+      vida -= cantidad;
+    }
+  };
+  
+  boolean IFrame() {
+    return millis() - ultimoGolpe < duracionIFrames;
+  };
 
-  void actualizar(PVector direccion) {
+  void actualizar(PVector direccionPos) {
     //POSICIÓN DEL JUGADOR
-    move(direccion.x * rapidez, direccion.y * rapidez, solidos);
+    
     posicion.set(x+w/2,y+h);
+    move(direccionPos.x * rapidez, direccionPos.y * rapidez, solidos); 
+    
+    move(velocidadKnockback.x, velocidadKnockback.y, solidos);
+
+    velocidadKnockback.mult(friccionKnockback);
+    if (velocidadKnockback.magSq() < 0.01) velocidadKnockback.set(0, 0);
     
     //DISPARO
     boolean Disparar = input.kW || input.kA || input.kS || input.kD;
@@ -32,13 +82,34 @@ class Jugador extends Caja {
     }
     
     //ANIMACIÓN AL CAMINAR
-    animar(direccion.magSq() > 0);
+    PVector disparo = input.leerDisparo();
+    
+    animar(direccionPos.magSq() > 0);
+    
+    if (Math.abs(disparo.x) > 0.01) {
+      Mirar = (disparo.x > 0) ? -1 : 1;
+    }
+    // Si no hay disparo, miramos hacia donde nos movemos
+    else if (Math.abs(direccionPos.x) > 0.01) {
+      Mirar = (direccionPos.x > 0) ? -1 : 1;
+    }
+    
+    vida = constrain(vida,0,50);
   }
 
   private void animar(boolean moviendose) {
     this.moviendose = moviendose;
+    
+    spriteMirar = lerp(spriteMirar,Mirar,0.3);
+    
+    if (IFrame()){
+      spriteOpacity = sin(millis()) * 1.5;
+    }else{
+      spriteOpacity = 1;
+    }
+    
     if (moviendose) {
-      currentTime += 0.4;
+      currentTime += 0.7;
       spriteAngle  = sin(currentTime) * 0.1;
     } else {
       spriteAngle = 0;
@@ -49,15 +120,23 @@ class Jugador extends Caja {
   PVector bocaDeFuego() {
     return PVector.add(posicion, OFFSET_CANON);
   }
+  
+  public float getY() {
+    return y+h;
+  }
 
   void dibujar(PGraphics p) {
-    drawSombra(p,posicion.x,posicion.y,tam);
-    p.pushMatrix();
+    drawSombra(p,posicion.x+(0.9*Mirar),posicion.y,tam);
+    
+    p.push();
       p.translate(posicion.x, posicion.y);
-      p.rotate(spriteAngle);
+      //p.rotate(spriteAngle);
       p.fill(col, 0, 0);
-      p.rect(-tam/2, -tam, tam, tam);
-    p.popMatrix();
+      p.tint(255,255*spriteOpacity);
+      //p.rect(-tam/2, -tam, tam, tam);
+      p.scale(spriteMirar-(spriteAngle*Mirar),1+spriteAngle);
+      p.image(sprJugador,-tam/2, -tam);
+    p.pop();
   }
 }
 
@@ -153,6 +232,19 @@ class Bala extends Caja {
             sndCajaRota.trigger();
             r.alDestruirse(); // deja de bloquear
           } // deja de bloquear
+        }
+        viva = false;
+        sndBalaChoca.trigger();
+        break;
+      }
+    }
+    
+    for (int c = killers.size() - 1; c >= 0; c--) {
+      Caja s = killers.get(c);
+      if (overlaps(s)) {                       // la bala choca con un sólido
+        if (s instanceof Enemigo) {
+          Enemigo r = (Enemigo) s;
+          r.daño(this,1);
         }
         viva = false;
         sndBalaChoca.trigger();

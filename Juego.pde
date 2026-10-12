@@ -1,4 +1,3 @@
-import gifAnimation.*; //Libreria de animación por gif //Dudo que sea la mejor manera, pero no conozco otra mejor xD
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -23,7 +22,8 @@ interface Dibujable {
   void dibujar(PGraphics p);
 }
 
-ArrayList<Moneda> monedas = new ArrayList<Moneda>();
+ArrayList<Items> items = new ArrayList<Items>();
+ArrayList<Enemigo> killers = new ArrayList<Enemigo>();
 ArrayList<Caja> solidos = new ArrayList<Caja>();
 ArrayList<Caja> solidosRompibles = new ArrayList<Caja>();
 
@@ -39,12 +39,15 @@ float lengthdir_y(float len, float dir) {
 
 void init() { //INICIALIZAR TODO Y REPETIR TODO
 
-  monedas = new ArrayList<Moneda>();
+  items = new ArrayList<Items>();
+  killers = new ArrayList<Enemigo>();
   solidos = new ArrayList<Caja>();
   solidosRompibles = new ArrayList<Caja>();
   
   //Crear al jugador
-  jugador = new Jugador(ventanaW/2,ventanaH/2,3,32); 
+  jugador = new Jugador(ventanaW/2,ventanaH/2,2,16,5); 
+  
+  killers.add(new Enemigo(ventanaW/2+16,ventanaH/2+16,5)); 
   
   //Crear la camara
   camara = new Camara(ventanaW, ventanaH, MUNDO_ANCHO, MUNDO_ALTO);
@@ -61,25 +64,21 @@ void init() { //INICIALIZAR TODO Y REPETIR TODO
   );
   
   //Generar monedas aleatoriamente por la sala
-  while (monedas.size() < 10) {
-    monedas.add(new Moneda(32+random(MUNDO_ANCHO-64), 32+random(MUNDO_ALTO-64)));
+  while (items.size() < 10) {
+    items.add(new Moneda(32+random(MUNDO_ANCHO-64), 32+random(MUNDO_ALTO-64)));
   }
   
   for (int c = 0; c < 360; c+= 360/5){
     float puntaX = 200 + lengthdir_x(32, c);
     float puntaY = 100 + lengthdir_y(32, c);
-    solidos.add(new CajaConMoneda(puntaX, puntaY, 32, 32,3));
+    solidos.add(new CajaConMoneda(puntaX, puntaY, 16, 16,3));
   }
   
   //Añadir cajas a la sala, de diferente tipo
-  solidos.add(new CajaRompible(32, 32, 32, 32,10));
-  solidos.add(new CajaConMoneda(64, 64, 32, 32,10));
+  solidos.add(new CajaRompible(32, 32, 16, 16,10));
+  solidos.add(new CajaConMoneda(64, 64, 16, 16,10));
   
   puntos = 0;
-  
-  sprMoneda = new Gif(this, "./Sprites/Moneda/Moneda.gif");
-  sprMoneda.loop();
-  
 }
 
 void settings() { //Setear el sketch
@@ -113,6 +112,8 @@ void draw() {
   background(0);
   createCanvas();
   actualizarProcesos();
+  
+  windowTitle("Magic Rooms - fps: " + floor(frameRate));
 }
 
 void keyPressed() {
@@ -150,8 +151,8 @@ void createCanvas() {
           }
         }
         
-        jugador.dibujar(lienzo); //Dibujar al jugador
         disparos.dibujar(lienzo); //Dibujar las balas
+        
         /*for (Moneda m : monedas) m.dibujar(lienzo); //Dibujar todas las monedas
         for (Caja s : solidos) s.dibujar(lienzo); //Dibujar todos los solidos*/
         for (Dibujable d : escena) d.dibujar(lienzo);
@@ -169,14 +170,17 @@ void actualizarProcesos() {
   jugador.actualizar(dirMovimiento);
   camara.seguir(jugador.x + jugador.w/2, jugador.y + jugador.h/2);
   disparos.actualizar();
-  for (Moneda m : monedas) m.actualizar();
-  monedas.removeIf(m -> m.recogida); 
   
+  for (Enemigo a : killers) a.actualizar();
+  for (Items m : items) m.actualizar();
+  items.removeIf(m -> m.recogida);
+  killers.removeIf(m -> m.muerto);
   
   escena.clear();
-  //escena.add(jugador);
-  escena.addAll(monedas);
+  escena.add(jugador);
+  escena.addAll(items);
   escena.addAll(solidos);
+  escena.addAll(killers);
   Collections.sort(escena, new Comparator<Dibujable>() {
     public int compare(Dibujable a, Dibujable b) {
       return Float.compare(a.getY(), b.getY());
