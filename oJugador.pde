@@ -91,7 +91,7 @@ class Jugador extends Entidad {
       currentTime += 0.7;
       spriteAngle  = sin(currentTime) * 0.1;
     } else {
-      spriteAngle = 0;
+      spriteAngle = lerp(spriteAngle,0,0.2);
     }
   }
 
@@ -108,10 +108,10 @@ class Jugador extends Entidad {
     drawSombra(p, posicion.x+(0.9*mirar), posicion.y, 16);
 
     p.push();
-    p.translate(posicion.x, posicion.y);
-    p.tint(255, 255*spriteOpacity);
-    p.scale(spriteMirar-(spriteAngle*mirar), 1+spriteAngle);
-    p.image(sprJugador, -sprJugador.width/2, visualY-sprJugador.height);
+      p.translate(posicion.x, posicion.y);
+      p.tint(255, 255*spriteOpacity);
+      p.scale(spriteMirar-(spriteAngle*mirar), 1+spriteAngle);
+      p.image(sprJugador, -sprJugador.width/2, visualY-sprJugador.height);
     p.pop();
   }
 }
@@ -145,6 +145,7 @@ class Disparos {
     PVector origen   = PVector.add(centro, PVector.mult(dirFinal, radioNacimiento));
 
     balas.add(new Bala(origen, rapidezBala, dirFinal, tamBala));
+    jugador.spriteAngle = -0.5;
     iframesDisparo.activar();
   }
 

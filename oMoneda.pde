@@ -8,6 +8,7 @@ ArrayList<Items> items = new ArrayList<Items>();
 class Items extends Caja implements Dibujable {
   PVector velocidad = new PVector(0, 0);
   float   friccion = 0.9;
+  boolean recogible = false;
   boolean recogida = false; //Esta moneda no ha sido recogida por defecto
 
   int     rapidez = 1;
@@ -41,6 +42,7 @@ class Items extends Caja implements Dibujable {
 
     if (!siguiendo && velocidad.magSq() == 0) {
       siguiendo = true;
+      recogible = true;
     }
 
     if (puedePerseguir && siguiendo) {
@@ -60,7 +62,7 @@ class Items extends Caja implements Dibujable {
 
     move(velocidad.x, velocidad.y, solidos);
 
-    if (jugador.overlaps(this)) { //Si el jugador choca con una moneda en especifica
+    if (jugador.overlaps(this) && recogible) { //Si el jugador choca con una moneda en especifica
       recoger();
     }
   }

@@ -8,6 +8,9 @@ PFont everydayStandardBlack;
 
 class DañoParticula extends SistemaParticulas{
   float x, y;
+  PVector posicion;
+  PVector velocidad;
+  PVector dir;
   float vy, vx;      // velocidad
   float alpha;       // transparencia
   float fadeSpeed;
@@ -18,11 +21,14 @@ class DañoParticula extends SistemaParticulas{
   float rotSpeed;    // velocidad de rotación
   
   DañoParticula(float x, float y, String txt) {
-    this.x = x;
-    this.y = y;
+    this.posicion = new PVector(x,y);
+    
+    this.dir = new PVector(random(-1,1),random(-1,1));
+    this.velocidad = PVector.mult(dir,2.0);
     this.txt = txt;
+    
     this.alpha = 255;
-    this.size = 8;
+    this.size = 7;
     this.vx = random(-2, 2);     // sale en dirección aleatoria
     this.vy = random(-4, -1);    // sube un poco primero
     this.fadeSpeed = random(3, 6);
@@ -32,12 +38,12 @@ class DañoParticula extends SistemaParticulas{
   }
   
   void actualizar() {
-    x += vx;
-    y += vy/2;
-    vy += 0.3;       // gravedad — la jala hacia abajo
+    posicion.add(velocidad);
+    velocidad.mult(0.96);
+    
     alpha -= fadeSpeed;  
     
-    if (size <= 0 || alpha <= 0) { muerto = true; }
+    if (alpha <= 0) { muerto = true; }
   }
   
   void dibujar(PGraphics p) {
@@ -45,11 +51,15 @@ class DañoParticula extends SistemaParticulas{
     p.pushStyle();
       p.textFont(everydayStandardBlack,size);
       p.textAlign(CENTER, CENTER);
-      p.translate(x, y);
+      p.translate(posicion.x, posicion.y);
       p.rotate(ang);
       p.fill(255, 255, 255, alpha);   // color con transparencia
       p.text(txt, 0, 0);
     p.popStyle();
     p.popMatrix();
   }
+}
+
+void dibujarTextoBorder(PGraphics p,float x, float y, String str) {
+  //for 
 }

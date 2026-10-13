@@ -49,7 +49,7 @@ void init() { //INICIALIZAR TODO Y REPETIR TODO
     radians(2), // dispersión
     5, // rapidez bala
     5, // tamaño bala
-    16 // radio de nacimiento (boca → bala)
+    8 // radio de nacimiento (boca → bala)
    );
 
   //Generar monedas aleatoriamente por la sala
@@ -135,6 +135,8 @@ void createCanvas() {
 void actualizarProcesos() {
   PVector dirMovimiento = input.leerMovimiento();  // flechas
   jugador.actualizar(dirMovimiento);
+  //jugador.removeIf(jugador.muerto);
+  
   camara.seguir(jugador.x + jugador.w/2, jugador.y + jugador.h/2);
   disparos.actualizar();
 
