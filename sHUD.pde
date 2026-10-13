@@ -1,5 +1,7 @@
 //INICIALIZAR LA INTERFAZ DEL JUEGO
 
+HUD hud;
+
 class HUD {
   PImage hudCoin = loadImage("./Sprites/HUD/Coin.png");
   PImage hudHeart = loadImage("./Sprites/HUD/Heart.png");

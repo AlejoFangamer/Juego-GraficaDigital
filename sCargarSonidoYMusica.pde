@@ -39,9 +39,6 @@ void CargarSonidos() {
 
 ///CARGAR SPRITES
 
-
-
-
 //LOGICA SPRITES
 
 HashMap<String, PImage[]> cacheFrames = new HashMap<String, PImage[]>();
@@ -75,6 +72,9 @@ class Sprite {
     frames = cargarFrames("./Sprites/"+ruta);
     reiniciar();
   }
+  
+  int ancho() { return frames[0].width; }
+  int alto()  { return frames[0].height; }
 
   void reiniciar() {
     cursor = constrain(frameInicial, 0, frames.length - 1);

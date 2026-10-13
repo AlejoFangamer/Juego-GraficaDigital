@@ -7,9 +7,9 @@ float MUNDO_ALTO  = ventanaH * 1.2;
 
 class Camara {
   PVector pos = new PVector(0, 0);   // esquina superior izquierda de lo que se ve
-  float suavizado = 0.1;             // 1 = pegada al objetivo, 0.05 = muy lenta
-  float anchoVista, altoVista;       // tamaño de la pantalla
-  float mundoAncho, mundoAlto;       // tamaño total del mapa
+  float   suavizado = 0.1;             // 1 = pegada al objetivo, 0.05 = muy lenta
+  float   anchoVista, altoVista;       // tamaño de la pantalla
+  float   mundoAncho, mundoAlto;       // tamaño total del mapa
 
   Camara(float anchoVista, float altoVista, float mundoAncho, float mundoAlto) {
     this.anchoVista = anchoVista;

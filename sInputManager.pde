@@ -3,6 +3,8 @@
 //detecta constantemente si se están presionando ciertas teclas.
 //y esta detección se almacena en variables que otros objetos pueden usar.
 
+InputManager input;
+
 class InputManager {
   
   private boolean kUp, kDown, kLeft, kRight; //Teclas Direccionales
@@ -53,4 +55,16 @@ class InputManager {
     if (d.magSq() > 1) d.normalize();
     return d;
   }
+}
+
+void keyPressed() {
+  input.presionar(key, keyCode);
+
+  if (key == 'r' || key == 'R') {
+    init();
+  }
+}
+
+void keyReleased() {
+  input.soltar(key, keyCode);
 }

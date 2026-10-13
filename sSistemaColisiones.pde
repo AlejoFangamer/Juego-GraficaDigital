@@ -4,6 +4,7 @@
 //Detecta si x objeto entra en contacto o se solapa con otro objeto, teniendo en cuenta su posicion, anchura y altura.
 //Es bastante general, si queremos hacer que un objeto tenga propiedades como posicion o tamaño, las debemos setear con super y depender de ella.
 
+ArrayList<Caja> solidos = new ArrayList<Caja>();
 class Caja implements Dibujable {
   float x, y, w, h;
   color c = color(110);

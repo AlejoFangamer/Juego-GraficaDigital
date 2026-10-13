@@ -1,3 +1,5 @@
+ArrayList<Items> items = new ArrayList<Items>();
+
 ///OBJETO MONEDA
 
 //Coleccionable
@@ -5,18 +7,18 @@
 
 class Items extends Caja implements Dibujable {
   PVector velocidad = new PVector(0, 0);
-  float friccion = 0.9;
+  float   friccion = 0.9;
   boolean recogida = false; //Esta moneda no ha sido recogida por defecto
 
-  int rapidez = 1;
+  int     rapidez = 1;
 
   boolean puedePerseguir = false;
   boolean siguiendo = false;
-  float radioIman  = 32;     // distancia a la que empieza a atraer
-  float fuerzaIman = 2;
+  float   radioIman  = 32;     // distancia a la que empieza a atraer
+  float   fuerzaIman = 2;
 
-  float visualX = 0;
-  float t = 0;
+  float   visualX = 0;
+  float   t = 0;
 
   Items(float x, float y, float w, float h) {
     super(x, y, w, h); //Valores de colision
@@ -79,21 +81,20 @@ class Items extends Caja implements Dibujable {
 
 
 class Moneda extends Items {
-  Sprite sprite = new Sprite("Items/Moneda.gif");
-
+  Sprite sprMoneda = new Sprite("Items/Moneda.gif");
   //float tam = 16; //Tamaño de moneda
 
   Moneda(float x, float y) {
     super(x, y, 8, 8); //Valores de colision
-    sprite.fps = 8;
-    sprite.frameInicial = int(random(sprite.cantidadFrames()));
-    sprite.reiniciar();
+    sprMoneda.fps = 8;
+    sprMoneda.frameInicial = int(random(sprMoneda.cantidadFrames()));
+    sprMoneda.reiniciar();
     puedePerseguir = true;
   }
 
   void actualizar() {
     super.actualizar();
-    sprite.actualizar();
+    sprMoneda.actualizar();
   }
 
   void recoger() {
@@ -106,7 +107,7 @@ class Moneda extends Items {
     drawSombra(p, round(x+(w/2)), round(y+h), w);
     p.pushMatrix();
     p.translate(x, y);
-    sprite.dibujar(p, 0, visualX, w, h);
+    sprMoneda.dibujar(p, 0, visualX, w, h);
     p.popMatrix();
   }
 }

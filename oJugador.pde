@@ -1,113 +1,92 @@
-int vida = 3;
+Jugador jugador;
 
-class Jugador extends Caja {
-  PImage sprJugador = loadImage("./Sprites/Jugador/Jugador.png");
-  
-  // --- Estado ---
+class Jugador extends Entidad {
+  PImage  sprJugador = loadImage("./Sprites/Jugador/Jugador.png");
+
+  //Estado
   PVector posicion;
-  int vida;
-  int maxVida;
-  float Mirar = 1;
-  float spriteMirar = Mirar;
-  float rapidez;
-  float tam;
-  int col = 255;
+  float   rapidez;
   
-  //--I-frames--
-  int duracionIFrames = 1000;   // ms de invulnerabilidad
-  int ultimoGolpe    = -999999;
+  //Mirada
+  float   mirar = 1;
+  float   spriteMirar = mirar;
   
-  //--Knockback--
-  PVector velocidadKnockback = new PVector(0, 0);
-  float   fuerzaKnockback    = 8;      // píxeles por frame
-  float   friccionKnockback  = 0.85; 
-
   // --- Animación ---
   boolean moviendose = false;
   float   currentTime = 0;
   float   spriteAngle = 0;
   float   spriteOpacity = 1;
+  float   visualY = 0;
+  float   visualYTime = 0;
+  float   visualYamp = 0;
 
   // --- Punto de nacimiento del cañón (constante, no se recalcula) ---
-  final PVector OFFSET_CANON = new PVector(0, -8);
+  final PVector OFFSET_CANON = new PVector(0, -4);
 
-  Jugador(float x, float y, float rapidez, float tam, int vida) {
-    super(x - tam/2, y - tam, 8, 8);
+  Jugador(float x, float y, float rapidez, int vida) {
+    super(x, y, 8, 8, vida);
     this.posicion = new PVector(x, y);
     this.rapidez  = rapidez;
-    this.tam      = tam;
-    this.vida     = vida;
-    this.maxVida  = vida;
+    
+    iframes.duracion  = 1000;             // ms de invulnerabilidad
+    fuerzaKnockback   = 8;
+    friccionKnockback = 0.85;
+  }
+
+  void alRecibirDaño() {
+    visualYamp = 10;
+  };
+
+  public void actualizar(PVector mov) {
+    //POSICIÓN DEL JUGADOR
+    move(mov.x * rapidez, mov.y * rapidez, solidos);
+    aplicarKnockback();
+
+    posicion.set(x+w/2, y+h);
+
+    //DISPARO
+    PVector apuntar = input.leerDisparo();
+    boolean Disparar = input.kW || input.kA || input.kS || input.kD;
+    
+    if (Disparar) {
+      disparos.disparar(bocaDeFuego(), apuntar);
+    }
+    
+    actualizarMirada(mov,apuntar);
+    animar(mov.magSq() > 0);
+
+    vida = constrain(vida, 0, maxVida);
   }
   
-  void daño(Caja atacante, int cantidad) {
-    if (IFrame()) return;
-    ultimoGolpe = millis();
-    
-     // Overlap en cada eje
-    float overlapX = Math.min(x + w, atacante.x + atacante.w) - Math.max(x, atacante.x);
-    float overlapY = Math.min(y + h, atacante.y + atacante.h) - Math.max(y, atacante.y);
-  
-    // El eje con MENOS solapamiento es el lado del impacto
-    if (overlapX < overlapY) {
-      velocidadKnockback = new PVector(x < atacante.x ? -1 : 1, 0).mult(fuerzaKnockback);
-    } else {
-      velocidadKnockback = new PVector(0, y < atacante.y ? -1 : 1).mult(fuerzaKnockback);
+  void actualizarMirada(PVector mov, PVector apuntar) {
+    if (abs(apuntar.x) > 0.01) {
+      mirar = (apuntar.x > 0) ? -1 : 1;
+    } else if (abs(mov.x) > 0.01) {
+      mirar = (mov.x > 0) ? -1 : 1;
     }
-  
-    if (vida > 0){
-      vida -= cantidad;
-    }
-  };
-  
-  boolean IFrame() {
-    return millis() - ultimoGolpe < duracionIFrames;
-  };
-
-  void actualizar(PVector direccionPos) {
-    //POSICIÓN DEL JUGADOR
-    
-    posicion.set(x+w/2,y+h);
-    move(direccionPos.x * rapidez, direccionPos.y * rapidez, solidos); 
-    
-    move(velocidadKnockback.x, velocidadKnockback.y, solidos);
-
-    velocidadKnockback.mult(friccionKnockback);
-    if (velocidadKnockback.magSq() < 0.01) velocidadKnockback.set(0, 0);
-    
-    //DISPARO
-    boolean Disparar = input.kW || input.kA || input.kS || input.kD;
-    if (Disparar) {
-      disparos.disparar(jugador.bocaDeFuego(), input.leerDisparo());
-    }
-    
-    //ANIMACIÓN AL CAMINAR
-    PVector disparo = input.leerDisparo();
-    
-    animar(direccionPos.magSq() > 0);
-    
-    if (Math.abs(disparo.x) > 0.01) {
-      Mirar = (disparo.x > 0) ? -1 : 1;
-    }
-    // Si no hay disparo, miramos hacia donde nos movemos
-    else if (Math.abs(direccionPos.x) > 0.01) {
-      Mirar = (direccionPos.x > 0) ? -1 : 1;
-    }
-    
-    vida = constrain(vida,0,50);
   }
 
   private void animar(boolean moviendose) {
     this.moviendose = moviendose;
-    
-    spriteMirar = lerp(spriteMirar,Mirar,0.3);
-    
-    if (IFrame()){
-      spriteOpacity = sin(millis()) * 1.5;
-    }else{
+
+    spriteMirar = lerp(spriteMirar, mirar, 0.3);
+
+    if (visualYamp > 0) {
+      visualYTime+=0.4;
+      visualYamp-=0.2;
+      visualY = -abs(sin(visualYTime) * (visualYamp));
+    } else {
+      visualYTime=0;
+      visualY=0;
+      visualYamp = 0;
+    }
+
+    if (invulnerable()) {
+      spriteOpacity = ((millis() / 80) % 2 == 0) ? 1.0 : 0.3;
+    } else {
       spriteOpacity = 1;
     }
-    
+
     if (moviendose) {
       currentTime += 0.7;
       spriteAngle  = sin(currentTime) * 0.1;
@@ -120,42 +99,38 @@ class Jugador extends Caja {
   PVector bocaDeFuego() {
     return PVector.add(posicion, OFFSET_CANON);
   }
-  
+
   public float getY() {
     return y+h;
   }
 
-  void dibujar(PGraphics p) {
-    drawSombra(p,posicion.x+(0.9*Mirar),posicion.y,tam);
-    
+  public void dibujar(PGraphics p) {
+    drawSombra(p, posicion.x+(0.9*mirar), posicion.y, 16);
+
     p.push();
-      p.translate(posicion.x, posicion.y);
-      //p.rotate(spriteAngle);
-      p.fill(col, 0, 0);
-      p.tint(255,255*spriteOpacity);
-      //p.rect(-tam/2, -tam, tam, tam);
-      p.scale(spriteMirar-(spriteAngle*Mirar),1+spriteAngle);
-      p.image(sprJugador,-tam/2, -tam);
+    p.translate(posicion.x, posicion.y);
+    p.tint(255, 255*spriteOpacity);
+    p.scale(spriteMirar-(spriteAngle*mirar), 1+spriteAngle);
+    p.image(sprJugador, -sprJugador.width/2, visualY-sprJugador.height);
     p.pop();
   }
 }
 
 //--------------- DISPARAR -----------------
+Disparos disparos;
+ArrayList<Bala> balas = new ArrayList<Bala>();
 
 class Disparos {
-  ArrayList<Bala> balas = new ArrayList<Bala>();
-
-  float cadencia;         // ms entre disparos
   float dispersion;       // radianes
   float rapidezBala;
   float tamBala;
   float radioNacimiento;  // distancia desde la boca al centro de la bala
 
-  int ultimoDisparo = -999999;
+  Cooldown iframesDisparo;
 
-  Disparos(float cadencia, float dispersion,
-           float rapidezBala, float tamBala, float radioNacimiento) {
-    this.cadencia        = cadencia;
+  Disparos(int cadencia , float dispersion,
+    float rapidezBala, float tamBala, float radioNacimiento) {
+    this.iframesDisparo = new Cooldown(cadencia);
     this.dispersion      = dispersion;
     this.rapidezBala     = rapidezBala;
     this.tamBala         = tamBala;
@@ -163,14 +138,14 @@ class Disparos {
   }
 
   void disparar(PVector centro, PVector direccion) {
-    if (millis() - ultimoDisparo < cadencia) return;
-    if (direccion.magSq() == 0) return;
+    if (iframesDisparo.activo()) return;
+    if (direccion.magSq() == 0 ) return;
 
     PVector dirFinal = aplicarDispersion(direccion);
     PVector origen   = PVector.add(centro, PVector.mult(dirFinal, radioNacimiento));
 
     balas.add(new Bala(origen, rapidezBala, dirFinal, tamBala));
-    ultimoDisparo = millis();
+    iframesDisparo.activar();
   }
 
   void actualizar() {
@@ -181,10 +156,6 @@ class Disparos {
     }
   }
 
-  void dibujar(PGraphics p) {
-    for (Bala b : balas) b.dibujar(p);
-  }
-
   private PVector aplicarDispersion(PVector direccion) {
     return direccion.copy().rotate(random(-dispersion, dispersion));
   }
@@ -192,13 +163,12 @@ class Disparos {
 
 //--------------- BALAS -----------------
 
-class Bala extends Caja {
+class Bala extends Caja implements Dibujable {
+  Sprite sprite = new Sprite("Jugador/sprJugadorBala.png"); //Cargar sprite de la caja
   PVector posicion;
   PVector velocidad;
   float   tam;
   boolean viva = true;
-  
-  PImage sprBala = loadImage("/Sprites/Jugador/sprJugadorBala.png"); 
 
   Bala(PVector origen, float rapidez, PVector direccion, float tam) {
     super(origen.x - tam/2, origen.y - tam/2, tam, tam);
@@ -212,14 +182,18 @@ class Bala extends Caja {
     x = posicion.x - tam/2;
     y = posicion.y - tam/2;
 
-    if (posicion.x < -tam || posicion.x > width  + tam ||
-        posicion.y < -tam || posicion.y > height + tam) {
+    if (posicion.x < -tam || posicion.x > MUNDO_ANCHO  + tam ||
+      posicion.y < -tam || posicion.y > MUNDO_ALTO + tam) {
       viva = false;
     }
 
     if (viva) choque();
   }
-  
+
+  public float getY() {
+    return y+h;
+  }
+
   void choque() {
     for (int c = solidos.size() - 1; c >= 0; c--) {
       Caja s = solidos.get(c);
@@ -238,13 +212,13 @@ class Bala extends Caja {
         break;
       }
     }
-    
-    for (int c = killers.size() - 1; c >= 0; c--) {
-      Caja s = killers.get(c);
+
+    for (int c = enemigos.size() - 1; c >= 0; c--) {
+      Caja s = enemigos.get(c);
       if (overlaps(s)) {                       // la bala choca con un sólido
         if (s instanceof Enemigo) {
           Enemigo r = (Enemigo) s;
-          r.daño(this,1);
+          r.daño(this, 1);
         }
         viva = false;
         sndBalaChoca.trigger();
@@ -253,11 +227,11 @@ class Bala extends Caja {
     }
   }
 
-  void dibujar(PGraphics p) {
+  public void dibujar(PGraphics p) {
     p.pushMatrix();
-      p.translate(posicion.x, posicion.y);
-      p.rotate(velocidad.heading()); //Apunta a la dirección que fue disparado (angulo de PVector)
-      p.image(sprBala,-sprBala.width,-sprBala.height/2);
+    p.translate(posicion.x, posicion.y);
+    p.rotate(velocidad.heading()); //Apunta a la dirección que fue disparado (angulo de PVector)
+    sprite.dibujar(p, -sprite.ancho(), -sprite.alto()/2, sprite.ancho(), sprite.alto());
     p.popMatrix();
   }
 }
