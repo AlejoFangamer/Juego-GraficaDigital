@@ -2,6 +2,7 @@ Jugador jugador;
 
 class Jugador extends Entidad {
   PImage  sprJugador = loadImage("./Sprites/Jugador/Jugador.png");
+  AudioSample[] sonidos = {sndJugadorHit,sndJugadorMuere};
 
   //Estado
   PVector posicion;
@@ -35,9 +36,16 @@ class Jugador extends Entidad {
 
   void alRecibirDaño() {
     visualYamp = 10;
+    sndJugadorHit.trigger();
   };
+  
+  void alMorir() { 
+    sndJugadorMuere.trigger();
+  }
 
   public void actualizar(PVector mov) {
+    if (muerto) { return; } 
+    
     //POSICIÓN DEL JUGADOR
     move(mov.x * rapidez, mov.y * rapidez, solidos);
     aplicarKnockback();
@@ -52,10 +60,11 @@ class Jugador extends Entidad {
       disparos.disparar(bocaDeFuego(), apuntar);
     }
     
+    //ANIMACIÓN
     actualizarMirada(mov,apuntar);
     animar(mov.magSq() > 0);
 
-    vida = constrain(vida, 0, maxVida);
+    //vida = constrain(vida, 0, maxVida);
   }
   
   void actualizarMirada(PVector mov, PVector apuntar) {
@@ -209,7 +218,10 @@ class Bala extends Caja implements Dibujable {
           } // deja de bloquear
         }
         viva = false;
-        sndBalaChoca.trigger();
+        
+        if (camara.adentroVista(posicion.x,posicion.y)){
+          sndBalaChoca.trigger();
+        }
         break;
       }
     }
@@ -222,6 +234,7 @@ class Bala extends Caja implements Dibujable {
           r.daño(this, 1);
         }
         viva = false;
+        
         sndBalaChoca.trigger();
         break;
       }

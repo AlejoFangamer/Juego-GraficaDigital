@@ -1,3 +1,9 @@
+/// SISTEMA DE ENTIDADES.
+// Cualquier entidad que reciba, o haga daño, usará esta funcion padre.
+
+
+// SISTEMA DE COOLDOWN
+// despues de X tiempo, puede realizar Y acción.
 class Cooldown {
   int     duracion;                  
   int     ultimo = -999999;
@@ -6,20 +12,20 @@ class Cooldown {
     this.duracion = duracion;
   }
 
-  void activar()   { ultimo = millis(); }
-  boolean activo() { return millis() - ultimo < duracion; }
+  void activar()   { ultimo = millis(); } //Activa el timer del cooldown.
+  boolean activo() { return millis() - ultimo < duracion; } //Detecta si la duración del cooldown ha pasado.
 }
 
 class Entidad extends Caja implements Dibujable {
-  int     vida;
-  int     maxVida;
-  boolean muerto = false;
+  int     vida; //Cuantas vidas tiene la entidad.
+  int     maxVida; //Cuantas vida tuvo la entidad.
+  boolean muerto = false; //Si está muerto o no.
   
-  Cooldown iframes = new Cooldown(0);
+  Cooldown iframes = new Cooldown(0); //Nuevo cooldown.
   
-  PVector velocidadKnockback = new PVector(0, 0);
-  float   fuerzaKnockback    = 1;      // pixeles por frame
-  float   friccionKnockback  = 0.85;
+  PVector velocidadKnockback = new PVector(0, 0); //Setear la dirección del knockback
+  float   fuerzaKnockback    = 1; //Velocidad del knockback por pixeles por frame
+  float   friccionKnockback  = 0.85; //Fricción del knockback
   
   Entidad(float x, float y, float w, float h, int vida) {
     super(x, y, w, h);
@@ -27,9 +33,11 @@ class Entidad extends Caja implements Dibujable {
     this.maxVida = vida;
   }
   
-  boolean invulnerable(){
+  boolean invulnerable(){ //Es invulnerable solo cuando el cooldown no ha pasado.
     return iframes.activo();
   }
+  
+  // Si la entidad recibe daño.
   
   void daño(Caja atacante, int cantidad) {
     if (muerto || invulnerable()) return;
@@ -46,6 +54,9 @@ class Entidad extends Caja implements Dibujable {
       alMorir();
     }
   }
+  
+  // SISTEMA DE KNOCKBACK
+  // Si, digamos, el jugador o un enemigo es disparado, hace un pequeño empuje al lado contrario al que fue disparado.
   
   void empujarDesde(Caja atacante) {
     float overlapX = min(x + w, atacante.x + atacante.w) - max(x, atacante.x);
@@ -66,7 +77,7 @@ class Entidad extends Caja implements Dibujable {
     if (velocidadKnockback.magSq() < 0.01) velocidadKnockback.set(0, 0);
   }
   
-  // --- Ganchos ---
+  // Ganchos , por si quiero colocar cosas para otros objetos.
   void alRecibirDaño() { }
   void alMorir() { }
   

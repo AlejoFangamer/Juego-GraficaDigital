@@ -1,4 +1,4 @@
-///INICIALIZAR LA CAMARA
+/// INICIALIZAR LA CAMARA
 
 Camara camara;
 
@@ -30,6 +30,11 @@ class Camara {
     pos.y = lerp(pos.y, cy - altoVista/2, suavizado);
     limitar();
   }
+  
+  boolean adentroVista(float x, float y){
+    return (x > pos.x && x < pos.x+anchoVista &&
+            y > pos.y && y < pos.y+altoVista);
+  } 
 
   // No mostrar nada fuera del mapa
   private void limitar() {

@@ -2,6 +2,7 @@
 
 //Solido
 ArrayList<Caja> solidosRompibles = new ArrayList<Caja>();
+
 class CajaRompible extends Caja implements Dibujable {
   Sprite sprite = new Sprite("Caja/Caja.png"); //Cargar sprite de la caja
   int vida; //Cuanta vida tiene la caja

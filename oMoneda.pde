@@ -1,11 +1,14 @@
+/// SISTEMA DE COLECCIONABLES
+
+// Una clase expandible para todo tipo de coleccionables.
+// en los cuales todos se transmiten la acción de si el jugador lo recoge, si se tira, etc.
+
 ArrayList<Items> items = new ArrayList<Items>();
 
-///OBJETO MONEDA
-
-//Coleccionable
-//Animación de moneda mediante libreria de gif
-
 class Items extends Caja implements Dibujable {
+  // EFECTO MAGNETO
+  // si el jugador se acerca ligeramente al objeto, los objetos se acercan al jugador, haciendo facil su recolección.
+  
   PVector velocidad = new PVector(0, 0);
   float   friccion = 0.9;
   boolean recogible = false;

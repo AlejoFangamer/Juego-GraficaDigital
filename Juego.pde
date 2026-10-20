@@ -1,11 +1,17 @@
-import java.util.Collections;
+/// INICIADOR
+// Todo se configura y se inicia desde este punto
+
+//import java.util.Collections;
 import java.util.Comparator;
+import geomerative.*; //Libreria.
+
 
 int ventanaW = 320; //Tamaño real de la ventana
 int ventanaH = 180;
 
-int ventanaW_new = ventanaW*4; //Tamaño maximizado de la ventana
-int ventanaH_new = ventanaH*4;
+int ventanaMult = 4;
+int ventanaW_new = ventanaW*ventanaMult; //Tamaño maximizado de la ventana
+int ventanaH_new = ventanaH*ventanaMult;
 
 int puntos = 0;
 
@@ -17,7 +23,7 @@ interface Dibujable {
   void dibujar(PGraphics p);
 }
 
-ArrayList<Dibujable> escena = new ArrayList<Dibujable>();
+ArrayList<Dibujable> escena = new ArrayList<Dibujable>(); // 
 
 float lengthdir_x(float len, float dir) {
   return len * cos(radians(dir));
@@ -27,21 +33,17 @@ float lengthdir_y(float len, float dir) {
   return len * sin(radians(dir));
 }
 
-void init() { //INICIALIZAR TODO Y REPETIR TODO
-  items = new ArrayList<Items>();
-  enemigos = new ArrayList<Killer>();
-  solidos = new ArrayList<Caja>();
-  solidosRompibles = new ArrayList<Caja>();
-  balas = new ArrayList<Bala>();
+//INICIALIZAR TODO Y REPETIR TODO
+void init() {
+
+  for (int i = 0; i < roomFiles.length; i++) {
+      roomImages[i] = loadImage("Niveles/" + roomFiles[i]);
+  }
 
   //Inicia en una room
-  roomTest = loadImage("/Niveles/test.png"); 
-  crearRoom(roomTest);
-
-  //Crear la camara
-  camara = new Camara(ventanaW, ventanaH, MUNDO_ANCHO, MUNDO_ALTO);
-  //Poner la camara en el centro del jugador
-  camara.centrar(jugador.x + jugador.w/2, jugador.y + jugador.h/2);
+  //roomTest = loadImage(); 
+  floorsPasados = -1;
+  crearNuevaRoom(roomImages[round(random(0,2))]);
 
   //El disparo del jugador
   disparos = new Disparos(
@@ -52,18 +54,16 @@ void init() { //INICIALIZAR TODO Y REPETIR TODO
     8 // radio de nacimiento (boca → bala)
    );
 
-  //Generar monedas aleatoriamente por la sala
-  while (items.size() < 10) {
-    items.add(new Moneda(32+random(MUNDO_ANCHO-64), 32+random(MUNDO_ALTO-64)));
-  }
-
-  puntos = 0;
 }
 
-void settings() { //Setear el sketch
+// SETEAR EL SKETCH //
+
+void settings() { 
   size(ventanaW, ventanaH, P2D);
   noSmooth(); //Sin antialias
 }
+
+// EJECUTAR COSAS QUE SOLO SE DEBEN EJECUTAR UNA SOLA VEZ //
 
 void setup() {
   centrarVentana(); //Centrar la ventana en caso de que se mueva
@@ -78,12 +78,11 @@ void setup() {
   hint(DISABLE_TEXTURE_MIPMAPS);
   ((PGraphicsOpenGL)g).textureSampling(3);
   lienzo = createGraphics(ventanaW, ventanaH, JAVA2D);
+  
+  frameRate(60); // 60 FPS
 
   //Carga fondo
-  fondo = loadImage("/Sprites/Fondo/Fondo.jpg");
-
-  //Setear los fps a 60
-  frameRate(60);
+  fondo = loadImage("/Sprites/Fondo/Fondo1.png");
 
   //Inicializar sala y variables
   init();
@@ -97,6 +96,10 @@ void draw() {
   windowTitle("Magic Rooms | fps: " + floor(frameRate));
 }
 
+
+// CENTRAR LA VENTANA AL CENTRO DEL MONITOR
+// ORIGINALMENTE USADO EN CASO DE QUE SE REDIMENSIONE LA VENTANA.
+
 void centrarVentana() {
   windowResize(ventanaW_new, ventanaH_new);
   int screenW = displayWidth; //Ancho del monitor
@@ -109,23 +112,23 @@ void centrarVentana() {
 //TODO SE DIBUJA ACA
 void createCanvas() {
   lienzo.beginDraw();
-  lienzo.background(0);
-  lienzo.pushMatrix();
-
-  camara.aplicar(lienzo); //La camara mueve todo lo que se dibuja
-
-  for (int x = 0; x < width; x += fondo.width) { //Dibujar fondo , me cago en processing y su forma de no tener fondos repetidos, es que me cago en su puta madre, son las 3am
-    for (int y = 0; y < height; y += fondo.height) {
-      lienzo.image(fondo, x, y);
-    }
-  }
+    lienzo.background(0);
+    lienzo.pushMatrix();
+    
+      camara.aplicar(lienzo); //La camara mueve todo lo que se dibuja
+    
+      for (int x = 0; x < width; x += fondo.width) { //Dibujar fondo , me cago en processing y su forma de no tener fondos repetidos, es que me cago en su puta madre, son las 3am.
+        for (int y = 0; y < height; y += fondo.height) {
+          lienzo.image(fondo, x, y);
+        }
+      }
+    
+      for (Dibujable d : escena) d.dibujar(lienzo);
+      //for (Muro p : muros) p.dibujar(lienzo); 
+      for (DañoParticula p : particulas) p.dibujar(lienzo); 
   
-  
-  for (Dibujable d : escena) d.dibujar(lienzo);
-  for (DañoParticula p : particulas) p.dibujar(lienzo); 
-
-  lienzo.popMatrix();
-  hud.dibujar(lienzo); //Dibujar la interfaz
+    lienzo.popMatrix();
+    hud.dibujar(lienzo); //Dibujar la interfaz
   lienzo.endDraw();
 
   image(lienzo, 0, 0, width, height);
@@ -135,21 +138,29 @@ void createCanvas() {
 void actualizarProcesos() {
   PVector dirMovimiento = input.leerMovimiento();  // flechas
   jugador.actualizar(dirMovimiento);
-  //jugador.removeIf(jugador.muerto);
   
   camara.seguir(jugador.x + jugador.w/2, jugador.y + jugador.h/2);
   disparos.actualizar();
 
   for (Killer a : enemigos) a.actualizar();
   for (Items m : items) m.actualizar();
+ 
+  for (Puerta n : puertas) n.actualizar(); 
   
   for (DañoParticula p : particulas) p.actualizar();
   
   particulas.removeIf(m -> m.muerto);
   items.removeIf(m -> m.recogida);
-  enemigos.removeIf(m -> m.muerto);
+  
+  int antes = enemigos.size();
+  enemigos.removeIf(e -> e.muerto);
+  enemigosDerrotados += antes - enemigos.size();
   
   
+  //SISTEMA DE Y-SORTING
+  //COMPARA LAS POSICIONES EN Y DE TODOS LOS OBJETOS.
+  //SI OBJETO A ESTÁ MAS ABAJO QUE OBJETO B, DIBUJARÁ EL OBJETO A POR ENCIMA DE OBJETO B.
+  //APOYO DE IA
 
   escena.clear();
   escena.add(jugador);
@@ -157,5 +168,7 @@ void actualizarProcesos() {
   escena.addAll(solidos);
   escena.addAll(enemigos);
   escena.addAll(balas);
+  escena.addAll(muros);
+  escena.addAll(puertas);
   escena.sort((a, b) -> Float.compare(a.getY(), b.getY()));
 }
