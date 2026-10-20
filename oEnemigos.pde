@@ -88,8 +88,8 @@ class Enemigo extends Killer {
 
   //VALORES PARA PERSEGUIR
 
-  boolean persiguiendo = false;
-  float   rapidez        = 1;
+  boolean persiguiendo   = false;
+  float   rapidez        = 0.7;
   float   radioDeteccion = 70;
   float   radioPerdida   = 120;
 

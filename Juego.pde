@@ -25,13 +25,6 @@ interface Dibujable {
 
 ArrayList<Dibujable> escena = new ArrayList<Dibujable>(); // 
 
-float lengthdir_x(float len, float dir) {
-  return len * cos(radians(dir));
-}
-
-float lengthdir_y(float len, float dir) {
-  return len * sin(radians(dir));
-}
 
 //INICIALIZAR TODO Y REPETIR TODO
 void init() {
@@ -53,6 +46,8 @@ void init() {
     5, // tamaño bala
     8 // radio de nacimiento (boca → bala)
    );
+   
+   puntos = 0;
 
 }
 
@@ -171,4 +166,14 @@ void actualizarProcesos() {
   escena.addAll(muros);
   escena.addAll(puertas);
   escena.sort((a, b) -> Float.compare(a.getY(), b.getY()));
+}
+
+
+
+float lengthdir_x(float len, float dir) {
+  return len * cos(radians(dir));
+}
+
+float lengthdir_y(float len, float dir) {
+  return len * sin(radians(dir));
 }

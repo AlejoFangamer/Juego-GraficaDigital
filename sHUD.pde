@@ -22,6 +22,7 @@ class HUD {
     transOpacidad = lerp(transOpacidad,int(jugador.muerto),0.05);
 
     p.pushMatrix();
+    p.pushStyle();
       p.translate(16, 16);
       p.noStroke();
       p.textAlign(LEFT, CENTER);
@@ -35,6 +36,7 @@ class HUD {
       p.fill(255, 255, 255);
       p.text(textMonedas, (hudHeartWidth + 4)+ hudMargin, hudMargin + ((textAscent()-textDescent()))/2); //Renderizar la cantidad de monedas
     p.popMatrix();
+    p.popStyle();
 
     p.pushStyle();
     p.pushMatrix();
@@ -56,16 +58,24 @@ class HUD {
     p.popMatrix();
     p.popStyle();
 
+    p.pushStyle();
     p.pushMatrix();
       p.textAlign(RIGHT, CENTER);
       p.translate(ventanaW-16,ventanaH-16);
       p.text(enemigosDerrotados + "/" + enemigosTotales, 0, 0); //Renderizar la cantidad de enemigos derrotados
     p.popMatrix();
+    p.popStyle();
     
     p.pushMatrix();
       p.textAlign(RIGHT, CENTER);
       p.translate(ventanaW-16,ventanaH-32);
       p.text("Floor: "+ floorsPasados, 0, 0); //Renderizar la cantidad de pisos pasados
+    p.popMatrix();
+    
+    p.pushMatrix();
+      p.textAlign(LEFT, CENTER);
+      p.translate(16,ventanaH-16);
+      p.text("FPS: " + floor(frameRate), 0, 0); //Renderizar la cantidad de pisos pasados
     p.popMatrix();
     
     p.pushMatrix();
@@ -77,18 +87,10 @@ class HUD {
         p.fill(255);
         p.textAlign(CENTER, CENTER);
         p.translate(ventanaW/2,ventanaH/2);
-        p.text("Te moriste, presiona R para reiniciar", 0,0);
+        p.text("Game Over \n presiona R para reiniciar", 0,0);
       }
     p.popMatrix();
     p.popStyle();
     
   }
-}
-
-void drawSombra(PGraphics p, float x, float y, float tam) { //Dibujar sombra debajo de los objetos.
-  p.pushStyle();
-    p.noStroke();
-    p.fill(0, 100);
-    p.ellipse(x, y, tam, tam/2);
-  p.popStyle();
 }

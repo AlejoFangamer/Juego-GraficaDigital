@@ -87,3 +87,11 @@ class Entidad extends Caja implements Dibujable {
   
   public void dibujar(PGraphics p) { }
 }
+
+void drawSombra(PGraphics p, float x, float y, float tam) { //Dibujar sombra debajo de los objetos.
+  p.pushStyle();
+    p.noStroke();
+    p.fill(0, 100);
+    p.ellipse(x, y, tam, tam/2);
+  p.popStyle();
+}

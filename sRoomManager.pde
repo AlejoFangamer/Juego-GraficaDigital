@@ -35,6 +35,7 @@ void crearNuevaRoom(PImage room) {
   final int colorJugador = #00ffff;
   final int colorEnemigo = #ff0000;
   final int colorPuerta = #ffff00;
+  final int colorCaja = #8f563b;
   
   camara = null;
   
@@ -70,12 +71,16 @@ void crearNuevaRoom(PImage room) {
           break;
         
         case colorEnemigo:
-          enemigos.add(new Enemigo(x*TS, y*TS, 5));
+          enemigos.add(new Enemigo(x*TS, y*TS, 2));
           break;  
           
         case colorPuerta:
           puertas.add(new Puerta(x*TS,y*TS));
           break;
+          
+        case colorCaja:
+          solidos.add(new CajaConMoneda(x*TS,y*TS,TS,TS,3));
+          break; 
           
       }
     }

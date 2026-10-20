@@ -48,7 +48,7 @@ void CargarSonidos() {
   sndJugadorMuere = minim.loadSample(s+"sndJugadorMuerte.wav",512);
   sndJugadorHit = minim.loadSample(s+"sndJugadorHit.wav",512);
   
-  musUrea = minim.loadFile(m+"musTopHoppy.mp3"); //Cargar musicas //Puta madre minim, como no vas a aceptar ogg, me cago en la puta de oro.
+  musUrea = minim.loadFile(m+"musFungalFunk.mp3"); //Cargar musicas //Puta madre minim, como no vas a aceptar ogg, me cago en la puta de oro.
   musUrea.setGain(-5);
   musUrea.play(); //Reproducir la musica.
   musUrea.loop(); //Se repite la musica
@@ -85,7 +85,7 @@ PImage[] cargarFrames(String ruta) {
 }
 
 //Clase padre de Sprite
-
+//APOYO DE IA
 class Sprite {
   PImage[] frames;
 
